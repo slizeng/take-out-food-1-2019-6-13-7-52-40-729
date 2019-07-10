@@ -50,6 +50,7 @@ describe('Processors with promotion', function () {
 
     const shouldDiscountCase = [{
       id: 'ITEM0001',
+      name: 'anyName',
       price: 2.00,
       count: 1
     }, {
@@ -67,7 +68,7 @@ describe('Processors with promotion', function () {
     expect(discountProcessor(shouldDiscountCase)).toEqual({
       total: 3,
       saved: 1,
-      discountItems: ['ITEM0001'],
+      discountItems: ['anyName'],
       type: PROMOTION_TYPES.FIFTY_OFF
     });
   });

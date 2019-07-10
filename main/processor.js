@@ -33,11 +33,11 @@ const PROCESSOR_MAPPING = {
     }
   },
   [PROMOTION_TYPES.FIFTY_OFF]: limitIdPool => items => {
-    return items.reduce(({ total, discountItems, saved }, { price, count, id }) => {
+    return items.reduce(({ total, discountItems, saved }, { price, count, id, name }) => {
       const shouldBeDiscounted = limitIdPool.includes(id);
       const rate = shouldBeDiscounted ? 0.5 : 1.0;
       const originalPrice = price * count;
-      const newDiscountItems = shouldBeDiscounted ? [...discountItems, id] : discountItems;
+      const newDiscountItems = shouldBeDiscounted ? [...discountItems, name] : discountItems;
 
       return {
         total: total + rate * originalPrice,
