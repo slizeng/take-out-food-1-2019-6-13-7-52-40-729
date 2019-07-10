@@ -1,6 +1,18 @@
-import { bestCharge } from "../main/best-charge";
+import { bestCharge, calculateChargesWithAllPromotionStrategies } from "../main/best-charge";
 
 describe('Take out food', function () {
+  it('should invoke 2 processors to calculate two results when calculate charges with all strategies given two promotions', () => {
+    const inputItems = [{
+      id: 'ITEM0001',
+      price: 29.00,
+      count: 1
+    }];
+
+    const result = calculateChargesWithAllPromotionStrategies(inputItems);
+
+    expect(result.length).toBe(2);
+  });
+  
   it('should generate best charge when best is 指定菜品半价', function () {
     let inputs = ["ITEM0001 x 1", "ITEM0013 x 2", "ITEM0022 x 1"];
     let summary = bestCharge(inputs).trim();
