@@ -2,11 +2,8 @@ import { loadPromotions, PROMOTION_TYPES } from "./promotions"
 
 export function getCalculationProcessors() {
   const promotions = loadPromotions();
-  return assembleProcessors(promotions);
-}
+  const promotionProcessors = promotions.map(({ type, items }) => PROCESSOR_MAPPING[type](items));
 
-function assembleProcessors(promotionList) {
-  const promotionProcessors = promotionList.map(({ type, items }) => PROCESSOR_MAPPING[type](items));
   return [...promotionProcessors, processorWithoutPromotion];
 }
 
