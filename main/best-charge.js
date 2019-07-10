@@ -1,20 +1,12 @@
 import { getCalculationProcessors } from "./processor";
 import { loadAllItems } from "./items";
+import { generateReceiptAsString } from "./receiptGenerator";
 
 export function bestCharge(input) {
-
-
-}
-
-export function chooseBestCharge(charges) {
-  let bestCharge = charges[charges.length - 1];
-  charges.forEach(charge => {
-    if (charge.total < bestCharge.total) {
-      bestCharge = charge;
-    }
-  });
-
-  return bestCharge;
+  const selectedItems = transformInputStringsToItems(input);
+  const charges = calculateChargesWithAllPromotionStrategies(selectedItems);
+  const bestCharge = chooseBestCharge(charges);
+  return generateReceiptAsString(selectedItems, bestCharge);
 }
 
 export function transformInputStringsToItems(input) {
@@ -29,6 +21,17 @@ export function transformInputStringsToItems(input) {
 export function calculateChargesWithAllPromotionStrategies(items) {
   const promotionWithProcessors = getCalculationProcessors();
   return promotionWithProcessors.map(processor => processor(items))
+}
+
+export function chooseBestCharge(charges) {
+  let bestCharge = charges[charges.length - 1];
+  charges.forEach(charge => {
+    if (charge.total < bestCharge.total) {
+      bestCharge = charge;
+    }
+  });
+
+  return bestCharge;
 }
 
 function selectItemFromItemPool(barcode, itemPool) {
