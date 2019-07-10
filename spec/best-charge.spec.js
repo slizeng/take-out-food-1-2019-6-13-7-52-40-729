@@ -1,11 +1,32 @@
-import { bestCharge, calculateChargesWithAllPromotionStrategies, transformInputStringsToItems } from "../main/best-charge";
+import {
+  bestCharge,
+  calculateChargesWithAllPromotionStrategies, chooseBestCharge,
+  transformInputStringsToItems
+} from "../main/best-charge";
+import { PROMOTION_TYPES } from "../main/promotions";
 
 describe('Take out food', function () {
-  it('should pick best charge by how much of saved money', () => {
+  it('should choose best charge by how much of saved money', () => {
     const charges = [
-      { total: 4, saved: 0},
-      { total: 3, saved: 1, discountItems: ['ITEM0001'] }
-    ]
+      { total: 24, saved: 6, type: PROMOTION_TYPES.OVER_THIRTY_MINUS_SIX },
+      { total: 15, saved: 15, discountItems: ['ITEM0001'], type: PROMOTION_TYPES.FIFTY_OFF }
+    ];
+
+    const bestCharge = chooseBestCharge(charges);
+
+    expect(bestCharge).toEqual(charges[1]);
+  });
+
+  it('should choose basic charge without promotion if no charge saves money', () => {
+    const charges = [
+      { total: 1, saved: 0, type: PROMOTION_TYPES.OVER_THIRTY_MINUS_SIX },
+      { total: 1, saved: 0, discountItems: [], type: PROMOTION_TYPES.FIFTY_OFF },
+      { total: 1, saved: 0, type: undefined }
+    ];
+
+    const bestCharge = chooseBestCharge(charges);
+
+    expect(bestCharge).toEqual(charges[2]);
   });
 
   it('should parse input string list and translate to items ', () => {
@@ -18,7 +39,7 @@ describe('Take out food', function () {
       name: '黄焖鸡',
       price: 18,
       count: 1
-    },{
+    }, {
       id: 'ITEM0013',
       name: '肉夹馍',
       price: 6.00,
@@ -43,7 +64,7 @@ describe('Take out food', function () {
       expect(charge.saved).toBeDefined();
     })
   });
-  
+
   it('should generate best charge when best is 指定菜品半价', function () {
     let inputs = ["ITEM0001 x 1", "ITEM0013 x 2", "ITEM0022 x 1"];
     let summary = bestCharge(inputs).trim();
