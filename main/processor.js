@@ -1,23 +1,25 @@
-import { loadPromotions } from "./promotions"
+import { loadPromotions, PROMOTION_TYPES } from "./promotions"
 
-export function getPromotionWithProcessors() {
+export function getCalculationProcessors() {
   const promotions = loadPromotions();
-  return assembleProcessorsWithPromotions(promotions);
+  return assembleProcessors(promotions);
 }
 
-function assembleProcessorsWithPromotions(promotionList) {
-  return promotionList.map(({ type, items }) => items ? {
-    type,
-    items,
-    processor: PROCESSOR_MAPPING[type](items)
-  } : {
-    type,
-    processor: PROCESSOR_MAPPING[type]()
-  });
+function assembleProcessors(promotionList) {
+  const promotionProcessors = promotionList.map(({ type, items }) => PROCESSOR_MAPPING[type](items));
+  return [...promotionProcessors, processorWithoutPromotion];
 }
+
+const processorWithoutPromotion = items => {
+  const total = items.reduce((total, { price, count }) => total + price * count, 0);
+  return {
+    total,
+    saved: 0
+  }
+};
 
 const PROCESSOR_MAPPING = {
-  '满30减6元': () => items => {
+  [PROMOTION_TYPES.OVER_THIRTY_MINUS_SIX]: () => items => {
     const THRESHOLD = 30;
     const COUPON_AMOUNT = 6;
 
@@ -26,10 +28,11 @@ const PROCESSOR_MAPPING = {
 
     return {
       total: discountedSum,
-      saved: sum - discountedSum
+      saved: sum - discountedSum,
+      type: PROMOTION_TYPES.OVER_THIRTY_MINUS_SIX
     }
   },
-  '指定菜品半价': limitIdPool => items => {
+  [PROMOTION_TYPES.FIFTY_OFF]: limitIdPool => items => {
     return items.reduce(({ total, discountItems, saved }, { price, count, id }) => {
       const shouldBeDiscounted = limitIdPool.includes(id);
       const rate = shouldBeDiscounted ? 0.5 : 1.0;
@@ -39,7 +42,8 @@ const PROCESSOR_MAPPING = {
       return {
         total: total + rate * originalPrice,
         discountItems: newDiscountItems,
-        saved: saved + (1 - rate) * originalPrice
+        saved: saved + (1 - rate) * originalPrice,
+        type: PROMOTION_TYPES.FIFTY_OFF
       };
     }, { total: 0, discountItems: [], saved: 0 });
   }

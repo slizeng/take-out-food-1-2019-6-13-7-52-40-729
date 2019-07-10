@@ -1,29 +1,15 @@
-import { getPromotionWithProcessors } from "../main/processor";
-
+import { getCalculationProcessors } from "../main/processor";
+import { PROMOTION_TYPES } from "../main/promotions";
 
 describe('Processors with promotion', function () {
-  const promotions = [{
-    type: '满30减6元'
-  }, {
-    type: '指定菜品半价',
-    items: ['ITEM0001', 'ITEM0022']
-  }];
-
   it('should assemble processors with promotions', () => {
-    const processorsWithPromotions = getPromotionWithProcessors();
+    const processors = getCalculationProcessors();
 
-    const typesAndItemsFromResult = processorsWithPromotions.map(({ type, items }) => items ? {
-      type,
-      items
-    } : { type });
-    expect(typesAndItemsFromResult).toEqual(promotions);
-    expect(typeof processorsWithPromotions[0].processor).toEqual('function');
-    expect(typeof processorsWithPromotions[1].processor).toEqual('function');
+    processors.forEach(processor => expect(typeof processor).toEqual('function'));
   });
 
   it('should process money off promotion successfully', () => {
-    const processorsWithPromotions = getPromotionWithProcessors();
-    const moneyOffProcessor = processorsWithPromotions[0].processor;
+    const moneyOffProcessor = getCalculationProcessors()[0];
 
     const shouldNotMoneyOffCase = [{
       id: 'ITEM0001',
@@ -41,13 +27,20 @@ describe('Processors with promotion', function () {
       count: 1
     }];
 
-    expect(moneyOffProcessor(shouldNotMoneyOffCase)).toEqual({ total: 29, saved: 0 });
-    expect(moneyOffProcessor(shouldMoneyOffCase)).toEqual({ total: 24, saved: 6 });
+    expect(moneyOffProcessor(shouldNotMoneyOffCase)).toEqual({
+      total: 29,
+      saved: 0,
+      type: PROMOTION_TYPES.OVER_THIRTY_MINUS_SIX
+    });
+    expect(moneyOffProcessor(shouldMoneyOffCase)).toEqual({
+      total: 24,
+      saved: 6,
+      type: PROMOTION_TYPES.OVER_THIRTY_MINUS_SIX
+    });
   });
 
   it('should process discount promotion successfully', () => {
-    const processorsWithPromotions = getPromotionWithProcessors();
-    const discountProcessor = processorsWithPromotions[1].processor;
+    const discountProcessor = getCalculationProcessors()[1];
 
     const shouldNotDiscountCase = [{
       id: 'ITEM0002',
@@ -65,7 +58,28 @@ describe('Processors with promotion', function () {
       count: 1
     }];
 
-    expect(discountProcessor(shouldNotDiscountCase)).toEqual({ total: 2, saved: 0, discountItems: [] });
-    expect(discountProcessor(shouldDiscountCase)).toEqual({ total: 3, saved: 1, discountItems: ['ITEM0001'] });
+    expect(discountProcessor(shouldNotDiscountCase)).toEqual({
+      total: 2,
+      saved: 0,
+      discountItems: [],
+      type: PROMOTION_TYPES.FIFTY_OFF
+    });
+    expect(discountProcessor(shouldDiscountCase)).toEqual({
+      total: 3,
+      saved: 1,
+      discountItems: ['ITEM0001'],
+      type: PROMOTION_TYPES.FIFTY_OFF
+    });
+  });
+
+  it('should process calculation without any promotion', () => {
+    const processorWithoutPromotion = getCalculationProcessors()[2];
+    const testItems = [{
+      id: 'ITEM0001',
+      price: 30.00,
+      count: 1
+    }];
+
+    expect(processorWithoutPromotion(testItems)).toEqual({ total: 30, saved: 0, type: undefined });
   });
 });
