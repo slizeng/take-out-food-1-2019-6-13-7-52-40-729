@@ -18,7 +18,11 @@
   },
   "homepage": "https://github.com/freewind/take-out-food#readme",
   "devDependencies": {
+    "@babel/core": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
+    "babel-jest": "^24.8.0",
     "jasmine": "^2.4.1",
-    "jasmine-console-reporter": "^1.2.6"
+    "jasmine-console-reporter": "^1.2.6",
+    "jest": "^24.8.0"
   }
 }
